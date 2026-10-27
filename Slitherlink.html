@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Slitherlink</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#eef1ec;--panel:#fbfcfa;--ink:#1d2a26;--muted:#5d6b66;--dot:#2c3b36;
+  --line:#0f6b5c;--cross:#b8c2bd;--ok:#2e7d32;--bad:#c62828;--grid:#d5dcd7;--btn:#1d2a26;--btnt:#fbfcfa;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#121917;--panel:#1a2421;--ink:#e6ede9;--muted:#8fa19a;--dot:#c9d6d0;
+    --line:#4fd1b5;--cross:#4a5a54;--ok:#7bd88a;--bad:#ff7a70;--grid:#2a3732;--btn:#e6ede9;--btnt:#121917;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121917;--panel:#1a2421;--ink:#e6ede9;--muted:#8fa19a;--dot:#c9d6d0;
+  --line:#4fd1b5;--cross:#4a5a54;--ok:#7bd88a;--bad:#ff7a70;--grid:#2a3732;--btn:#e6ede9;--btnt:#121917;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,"Times New Roman",serif;min-height:100vh;display:flex;justify-content:center}
+main{width:100%;max-width:640px;padding:20px 14px 32px}
+h1{font-size:2rem;margin:0 0 4px;letter-spacing:.01em}
+p.sub{margin:0 0 16px;color:var(--muted);font-size:.95rem;line-height:1.45}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+select,button{font:inherit;font-size:.95rem;padding:8px 12px;border-radius:8px;border:1px solid var(--grid);background:var(--panel);color:var(--ink)}
+button{cursor:pointer}
+button.primary{background:var(--btn);color:var(--btnt);border-color:var(--btn)}
+button:focus-visible,select:focus-visible{outline:2px solid var(--line);outline-offset:2px}
+.board{background:var(--panel);border:1px solid var(--grid);border-radius:12px;padding:8px}
+svg{display:block;width:100%;height:auto;touch-action:none;user-select:none;-webkit-user-select:none}
+.dot{fill:var(--dot)}
+.vis{stroke:none;stroke-linecap:round}
+.l1 .vis{stroke:var(--line);stroke-width:6}
+.x{display:none;stroke:var(--cross);stroke-width:2;stroke-linecap:round}
+.l2 .x{display:block}
+.hit{stroke:transparent;stroke-width:22;cursor:pointer}
+.hit:hover{stroke:color-mix(in srgb,var(--line) 18%,transparent)}
+.clue{font-size:22px;font-weight:700;text-anchor:middle;dominant-baseline:central;fill:var(--ink);pointer-events:none;font-family:Georgia,serif}
+.clue.done{fill:var(--muted);opacity:.6}
+.clue.over{fill:var(--bad)}
+.win .vis{stroke:var(--ok)!important}
+#status{min-height:1.6em;margin:12px 2px 0;font-size:1rem}
+#status.ok{color:var(--ok);font-weight:700}
+.help{margin-top:14px;color:var(--muted);font-size:.88rem;line-height:1.5}
+/* Style moderne */
+:root{--bg:#f3f4fb;--panel:#ffffff;--ink:#14172b;--muted:#6b7090;--dot:#14172b;--line:#5b5bf0;--cross:#c3c7e2;--ok:#12a672;--bad:#e5484d;--grid:#e3e5f2;--btn:#14172b;--btnt:#ffffff;--shadow:0 1px 2px rgba(20,23,43,.06),0 12px 32px rgba(60,60,140,.10)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b0d1a;--panel:#14172b;--ink:#eceefc;--muted:#8a8fb0;--dot:#aab0d8;--line:#8b8bff;--cross:#3a3f66;--ok:#3ddc97;--bad:#ff6b73;--grid:#242847;--btn:#eceefc;--btnt:#0b0d1a;--shadow:0 1px 2px rgba(0,0,0,.4),0 16px 40px rgba(0,0,0,.45)}}
+:root[data-theme="dark"]{--bg:#0b0d1a;--panel:#14172b;--ink:#eceefc;--muted:#8a8fb0;--dot:#aab0d8;--line:#8b8bff;--cross:#3a3f66;--ok:#3ddc97;--bad:#ff6b73;--grid:#242847;--btn:#eceefc;--btnt:#0b0d1a;--shadow:0 1px 2px rgba(0,0,0,.4),0 16px 40px rgba(0,0,0,.45)}
+body{font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:radial-gradient(900px 500px at 50% -10%,color-mix(in srgb,var(--line) 14%,transparent),transparent 70%),var(--bg);background-color:var(--bg)}
+main{padding-top:28px}
+h1{font-size:2.4rem;font-weight:800;letter-spacing:-.035em;margin-bottom:6px}
+p.sub{font-size:.95rem;line-height:1.55;max-width:48ch}
+.bar{gap:10px;margin-bottom:16px}
+select,button{font-family:inherit;font-weight:600;font-size:.9rem;padding:10px 16px;border-radius:999px;border:1px solid var(--grid);background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(20,23,43,.05);transition:transform .12s ease,box-shadow .12s ease,background .12s ease}
+button:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(60,60,140,.16)}
+button:active{transform:translateY(0)}
+button.primary{background:linear-gradient(135deg,var(--line),color-mix(in srgb,var(--line) 70%,#e45bd8));border-color:transparent;color:#fff}
+.board{background:var(--panel);border:1px solid var(--grid);border-radius:24px;padding:14px;box-shadow:var(--shadow);transition:box-shadow .4s ease}
+.board:has(.win){box-shadow:0 0 0 2px var(--ok),0 12px 40px color-mix(in srgb,var(--ok) 30%,transparent)}
+.dot{fill:var(--dot);opacity:.85}
+.l1 .vis{stroke-width:7;filter:drop-shadow(0 0 5px color-mix(in srgb,var(--line) 55%,transparent))}
+.win .vis{filter:drop-shadow(0 0 6px color-mix(in srgb,var(--ok) 60%,transparent))}
+.hit:hover{stroke:color-mix(in srgb,var(--line) 22%,transparent)}
+.clue{font-family:"Inter",system-ui,sans-serif;font-size:23px;font-weight:700}
+.clue.done{opacity:.35}
+#status{font-weight:600;min-height:1.8em}
+#status.ok{color:var(--ok);font-weight:700}
+.help{font-size:.82rem;line-height:1.6;max-width:60ch}
+</style>
+</head>
+<body>
+<main>
+  <h1>Slitherlink</h1>
+  <p class="sub">Tracez une boucle unique et fermée sur la grille. Chaque chiffre indique combien de côtés de sa case font partie de la boucle.</p>
+  <div class="bar">
+    <select id="size" aria-label="Taille"><option value="5">5 × 5</option><option value="7" selected>7 × 7</option><option value="10">10 × 10</option></select>
+    <select id="diff" aria-label="Difficulté"><option value="0.8">Facile</option><option value="0.58" selected>Moyen</option><option value="0.42">Difficile</option></select>
+    <button class="primary" id="new">Nouvelle grille</button>
+    <button id="reset">Effacer</button>
+    <button id="sol">Solution</button>
+  </div>
+  <div class="board"><svg id="svg" role="img" aria-label="Grille de Slitherlink"></svg></div>
+  <div id="status" aria-live="polite"></div>
+  <p class="help">Cliquez et glissez pour tracer la boucle d’un trait. Un clic sur une arête alterne trait → croix → vide, et le glisser applique ce même état aux arêtes suivantes (glissez depuis une arête vide pour tracer, depuis un trait pour effacer). Clic droit : croix directement. Les chiffres grisés sont satisfaits, les rouges sont dépassés. La grille est générée au hasard : toute boucle qui respecte tous les chiffres est acceptée.</p>
+</main>
+<script>
+(function(){
+const S=44,M=22,NS="http://www.w3.org/2000/svg";
+let R,C,clue,sol,H,V,svg=document.getElementById('svg'),statusEl=document.getElementById('status'),clueEls,won=false;
+const $=id=>document.getElementById(id);
+
+function gen(R,C,dens){
+  const inn=Array.from({length:R+2},()=>Array(C+2).fill(false));
+  const total=(R+2)*(C+2);
+  const ok=()=>{
+    for(let r=0;r<=R;r++)for(let c=0;c<=C;c++){
+      const a=inn[r][c],b=inn[r][c+1],d=inn[r+1][c],e=inn[r+1][c+1];
+      if(a===e&&b===d&&a!==b)return false;
+    }
+    let cnt=0,n=0;const seen=new Set(),st=[[0,0]];seen.add(0);
+    for(let r=0;r<R+2;r++)for(let c=0;c<C+2;c++)if(inn[r][c])n++;
+    while(st.length){const [r,c]=st.pop();cnt++;
+      for(const [dr,dc] of [[1,0],[-1,0],[0,1],[0,-1]]){
+        const rr=r+dr,cc=c+dc;
+        if(rr<0||cc<0||rr>=R+2||cc>=C+2||inn[rr][cc])continue;
+        const k=rr*(C+2)+cc;if(seen.has(k))continue;seen.add(k);st.push([rr,cc]);
+      }}
+    return cnt===total-n;
+  };
+  inn[1+Math.floor(Math.random()*R)][1+Math.floor(Math.random()*C)]=true;
+  let size=1;const target=Math.round(R*C*0.55);
+  for(let it=0;it<3000&&size<target;it++){
+    const cand=[];
+    for(let r=1;r<=R;r++)for(let c=1;c<=C;c++){
+      if(inn[r][c])continue;
+      if(inn[r-1][c]||inn[r+1][c]||inn[r][c-1]||inn[r][c+1])cand.push([r,c]);
+    }
+    if(!cand.length)break;
+    const [r,c]=cand[Math.floor(Math.random()*cand.length)];
+    inn[r][c]=true;
+    if(ok())size++;else inn[r][c]=false;
+  }
+  const g=(r,c)=>inn[r+1][c+1];
+  const h=[],v=[];
+  for(let r=0;r<=R;r++){h.push([]);for(let c=0;c<C;c++)h[r].push(g(r-1,c)!==g(r,c));}
+  for(let r=0;r<R;r++){v.push([]);for(let c=0;c<=C;c++)v[r].push(g(r,c-1)!==g(r,c));}
+  const cl=[];
+  for(let r=0;r<R;r++){cl.push([]);for(let c=0;c<C;c++){
+    const n=h[r][c]+h[r+1][c]+v[r][c]+v[r][c+1];
+    cl[r].push(Math.random()<dens?n:null);
+  }}
+  return {h,v,cl};
+}
+
+function el(name,attrs,parent){const e=document.createElementNS(NS,name);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+
+function build(){
+  R=C=+$('size').value;
+  const g=gen(R,C,+$('diff').value);
+  clue=g.cl;sol={h:g.h,v:g.v};
+  H=[];V=[];won=false;statusEl.textContent='';statusEl.className='';
+  svg.innerHTML='';svg.setAttribute('viewBox',`0 0 ${C*S+2*M} ${R*S+2*M}`);
+  svg.classList.remove('win');
+  const gEdges=el('g',{},svg),gDots=el('g',{},svg),gClues=el('g',{},svg);
+  const mk=(x1,y1,x2,y2,store,r,c)=>{
+    const grp=el('g',{},gEdges);
+    el('line',{class:'vis',x1,y1,x2,y2},grp);
+    const mx=(x1+x2)/2,my=(y1+y2)/2;
+    el('path',{class:'x',d:`M${mx-5} ${my-5}L${mx+5} ${my+5}M${mx+5} ${my-5}L${mx-5} ${my+5}`},grp);
+    const hit=el('line',{class:'hit',x1:x1+(x2>x1?8:0),y1:y1+(y2>y1?8:0),x2:x2-(x2>x1?8:0),y2:y2-(y2>y1?8:0),tabindex:-1},grp);
+    const o={st:0,grp};store[r][c]=o;
+    hit.__o=o;
+  };
+  for(let r=0;r<=R;r++){H.push([]);for(let c=0;c<C;c++)mk(M+c*S,M+r*S,M+(c+1)*S,M+r*S,H,r,c);}
+  for(let r=0;r<R;r++){V.push([]);for(let c=0;c<=C;c++)mk(M+c*S,M+r*S,M+c*S,M+(r+1)*S,V,r,c);}
+  for(let r=0;r<=R;r++)for(let c=0;c<=C;c++)el('circle',{class:'dot',cx:M+c*S,cy:M+r*S,r:3.2},gDots);
+  clueEls=[];
+  for(let r=0;r<R;r++){clueEls.push([]);for(let c=0;c<C;c++){
+    if(clue[r][c]===null){clueEls[r].push(null);continue;}
+    const t=el('text',{class:'clue',x:M+c*S+S/2,y:M+r*S+S/2+1},gClues);
+    t.textContent=clue[r][c];clueEls[r].push(t);
+  }}
+}
+
+function paint(o){o.grp.setAttribute('class','l'+o.st);}
+const on=o=>o.st===1?1:0;
+
+function update(){
+  let allOk=true;
+  for(let r=0;r<R;r++)for(let c=0;c<C;c++){
+    const t=clueEls[r][c];if(!t)continue;
+    const n=on(H[r][c])+on(H[r+1][c])+on(V[r][c])+on(V[r][c+1]);
+    t.setAttribute('class','clue'+(n===clue[r][c]?' done':n>clue[r][c]?' over':''));
+    if(n!==clue[r][c])allOk=false;
+  }
+  // degrés des sommets et connexité
+  const deg={},par={};
+  const key=(r,c)=>r*(C+1)+c;
+  const find=x=>{while(par[x]!==x){par[x]=par[par[x]];x=par[x];}return x;};
+  const link=(a,b)=>{for(const x of [a,b]){deg[x]=(deg[x]||0)+1;if(!(x in par))par[x]=x;}par[find(a)]=find(b);};
+  let edges=0;
+  for(let r=0;r<=R;r++)for(let c=0;c<C;c++)if(on(H[r][c])){link(key(r,c),key(r,c+1));edges++;}
+  for(let r=0;r<R;r++)for(let c=0;c<=C;c++)if(on(V[r][c])){link(key(r,c),key(r+1,c));edges++;}
+  let loop=edges>0;
+  for(const k in deg)if(deg[k]!==2)loop=false;
+  if(loop){const roots=new Set();for(const k in par)roots.add(find(+k));if(roots.size!==1)loop=false;}
+  won=allOk&&loop;
+  svg.classList.toggle('win',won);
+  statusEl.className=won?'ok':'';
+  statusEl.textContent=won?'Bravo, la boucle est correcte !':'';
+}
+
+function setEdges(fn){
+  for(let r=0;r<=R;r++)for(let c=0;c<C;c++){H[r][c].st=fn('h',r,c);paint(H[r][c]);}
+  for(let r=0;r<R;r++)for(let c=0;c<=C;c++){V[r][c].st=fn('v',r,c);paint(V[r][c]);}
+  update();
+}
+
+let drag=null;
+function apply(o,mode){
+  if(mode===0){if(o.st!==0){o.st=0;paint(o);return true;}}
+  else if(o.st===0){o.st=mode;paint(o);return true;}
+  return false;
+}
+function edgeAt(x,y){const e=document.elementFromPoint(x,y);return e&&e.__o?e.__o:null;}
+svg.addEventListener('pointerdown',e=>{
+  const o=edgeAt(e.clientX,e.clientY);if(!o)return;
+  e.preventDefault();
+  o.st=e.button===2?(o.st===2?0:2):(o.st+1)%3;
+  paint(o);update();
+  drag={mode:o.st,x:e.clientX,y:e.clientY};
+});
+window.addEventListener('pointermove',e=>{
+  if(!drag)return;
+  const dx=e.clientX-drag.x,dy=e.clientY-drag.y,n=Math.max(1,Math.ceil(Math.hypot(dx,dy)/6));
+  let ch=false;
+  for(let i=1;i<=n;i++){const o=edgeAt(drag.x+dx*i/n,drag.y+dy*i/n);if(o&&apply(o,drag.mode))ch=true;}
+  drag.x=e.clientX;drag.y=e.clientY;
+  if(ch)update();
+});
+['pointerup','pointercancel'].forEach(t=>window.addEventListener(t,()=>{drag=null;}));
+svg.addEventListener('contextmenu',e=>e.preventDefault());
+
+$('new').onclick=build;
+$('size').onchange=build;
+$('diff').onchange=build;
+$('reset').onclick=()=>setEdges(()=>0);
+$('sol').onclick=()=>{setEdges((t,r,c)=>(t==='h'?sol.h[r][c]:sol.v[r][c])?1:0);};
+build();
+})();
+</script>
+</body>
+</html>
