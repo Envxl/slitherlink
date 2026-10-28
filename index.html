@@ -95,10 +95,66 @@ svg{max-height:78dvh}
 @media (max-height:500px) and (orientation:landscape){
   h1{font-size:1.4rem}p.sub{display:none}svg{max-height:70dvh}
 }
+/* Hub, accessibilité, Kurodoko */
+[hidden]{display:none!important}
+body{display:block}
+main{margin:0 auto}
+:focus-visible{outline:3px solid var(--line);outline-offset:2px}
+.top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px;max-width:640px;margin:0 auto;padding:8px 10px;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(12px)}
+.brand{flex:1;font-weight:800;letter-spacing:-.02em;font-size:1.05rem}
+.top button{min-height:44px;min-width:44px;padding:8px 16px}
+#panel{max-width:640px;margin:0 auto;padding:0 10px 6px}
+.pan{background:var(--panel);border:1px solid var(--grid);border-radius:16px;padding:4px 16px;box-shadow:var(--shadow)}
+.pan label{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:50px;font-weight:500;font-size:.95rem}
+.pan input{width:26px;height:26px;accent-color:var(--line)}
+.cards{display:grid;gap:12px;margin-top:18px}
+.card{display:flex;gap:14px;align-items:center;text-align:left;width:100%;padding:16px;min-height:92px;border-radius:20px;background:var(--panel);border:1px solid var(--grid);box-shadow:var(--shadow);color:var(--ink)}
+.card .ic{flex:none;width:58px;height:58px;border-radius:16px;display:grid;place-items:center;background:color-mix(in srgb,var(--line) 14%,transparent);color:var(--line)}
+.card b{display:block;font-size:1.1rem;margin-bottom:3px}
+.card .d{display:block;color:var(--muted);font-size:.88rem;font-weight:400;line-height:1.4}
+div.card.soon{border-style:dashed;box-shadow:none;opacity:.7}
+.tools{display:flex;gap:8px;margin-bottom:12px}
+.tools button{flex:1;min-height:48px;padding:10px 8px}
+.tools button[aria-pressed=true]{background:var(--btn);color:var(--btnt);border-color:var(--btn)}
+.kg{display:grid;gap:4px;max-width:520px;margin:0 auto}
+.kc{aspect-ratio:1;min-width:0;padding:0;border-radius:10px;border:1px solid var(--grid);background:var(--panel);box-shadow:none;display:grid;place-items:center;font-weight:700;font-size:clamp(15px,5vw,24px);color:var(--ink)}
+.kc:hover{transform:none;box-shadow:none}
+.kc.n{background:color-mix(in srgb,var(--line) 10%,var(--panel))}
+.kc.b{background:var(--ink);border-color:var(--ink)}
+.kc.w::after{content:"";width:24%;aspect-ratio:1;border-radius:50%;background:var(--line);opacity:.6}
+.kc.done{color:var(--ok)}
+.kc.low{color:var(--bad)}
+.kc.err{background:var(--bad);border-color:var(--bad)}
+.kg.win .kc.b{background:var(--ok);border-color:var(--ok)}
+#kstatus{min-height:1.8em;margin:12px 2px 0;font-weight:600}
+#kstatus.ok{color:var(--ok);font-weight:700}
+.bar #knew{grid-column:1/-1}
+body.big .hit{stroke-width:34}
+body.big .clue{font-size:28px}
+body.big button,body.big select{min-height:54px;font-size:1.05rem}
+body.big .help{font-size:1rem}
+body.big .kg{gap:6px}
+body.hc{--ink:#000;--muted:#222;--line:#0030c8;--grid:#555;--cross:#555;--dot:#000}
+@media (prefers-color-scheme:dark){body.hc{--ink:#fff;--muted:#e8e8e8;--line:#a9bcff;--grid:#aaa;--cross:#aaa;--dot:#fff}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.stools{display:flex;gap:8px;margin-bottom:12px}
+.stools button{flex:1;min-height:48px;padding:10px 8px}
+.stools button[aria-pressed=true]{background:var(--btn);color:var(--btnt);border-color:var(--btn)}
 </style>
 </head>
 <body>
-<main>
+<header class="top"><button id="home" hidden aria-label="Retour au menu des jeux">← Jeux</button><span class="brand">Puzzle Hub</span><button id="a11y" aria-expanded="false" aria-controls="panel" aria-label="Réglages d’accessibilité">Aa</button></header>
+<div id="panel" hidden><div class="pan"><label>Grands éléments tactiles<input type="checkbox" id="o-big"></label><label>Contraste renforcé<input type="checkbox" id="o-hc"></label><label>Vibrations au toucher<input type="checkbox" id="o-vib"></label></div></div>
+<main id="hub">
+  <h1>Jeux de logique</h1>
+  <p class="sub">Choisissez un jeu. Chaque grille est générée au hasard.</p>
+  <div class="cards">
+    <button class="card" data-go="slitherlink"><span class="ic"><svg width="30" height="30" viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5h12v8h8v12H11v-8H5z"/></svg></span><span><b>Slitherlink</b><span class="d">Tracez une boucle unique autour des chiffres.</span></span></button>
+    <button class="card" data-go="kurodoko"><span class="ic"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="3" y="3" width="11" height="11" rx="3" fill="currentColor"/><rect x="16" y="3" width="11" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="2.5"/><rect x="3" y="16" width="11" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="2.5"/><rect x="16" y="16" width="11" height="11" rx="3" fill="currentColor"/></svg></span><span><b>Kurodoko</b><span class="d">Noircissez des cases pour satisfaire les chiffres.</span></span></button>
+    <div class="card soon"><span class="ic" aria-hidden="true">+</span><span><b>Bientôt</b><span class="d">D’autres jeux arrivent.</span></span></div>
+  </div>
+</main>
+<main id="slither" hidden>
   <h1>Slitherlink</h1>
   <p class="sub">Tracez une boucle unique et fermée sur la grille. Chaque chiffre indique combien de côtés de sa case font partie de la boucle.</p>
   <div class="bar">
@@ -108,9 +164,10 @@ svg{max-height:78dvh}
     <button id="reset">Effacer</button>
     <button id="sol">Solution</button>
   </div>
+  <div class="stools" role="group" aria-label="Outil de tracé"><button data-s="1" aria-pressed="true">━ Trait</button><button data-s="2" aria-pressed="false">✕ Croix</button></div>
   <div class="board"><svg id="svg" role="img" aria-label="Grille de Slitherlink"></svg></div>
   <div id="status" aria-live="polite"></div>
-  <p class="help">Cliquez et glissez pour tracer la boucle d’un trait. Un clic sur une arête alterne trait → croix → vide, et le glisser applique ce même état aux arêtes suivantes (glissez depuis une arête vide pour tracer, depuis un trait pour effacer). Clic droit : croix directement. Les chiffres grisés sont satisfaits, les rouges sont dépassés. La grille est générée au hasard : toute boucle qui respecte tous les chiffres est acceptée.</p>
+  <p class="help">Choisissez l’outil Trait ou Croix, puis touchez ou glissez sur les arêtes pour les poser. Repasser sur des arêtes déjà posées avec le même outil les efface, sans poser de croix. Clic droit : croix directement. Les chiffres grisés sont satisfaits, les rouges sont dépassés. La grille est générée au hasard : toute boucle qui respecte tous les chiffres est acceptée.</p>
 </main>
 <script>
 (function(){
@@ -225,25 +282,27 @@ function setEdges(fn){
   update();
 }
 
-let drag=null;
-function apply(o,mode){
-  if(mode===0){if(o.st!==0){o.st=0;paint(o);return true;}}
-  else if(o.st===0){o.st=mode;paint(o);return true;}
+let drag=null,stool=1;
+document.querySelectorAll('.stools button').forEach(b=>b.onclick=()=>{stool=+b.dataset.s;document.querySelectorAll('.stools button').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));});
+function apply(o,d){
+  if(d.mode===0){if(o.st===d.kind){o.st=0;paint(o);return true;}}
+  else if(o.st===0){o.st=d.mode;paint(o);return true;}
   return false;
 }
 function edgeAt(x,y){const e=document.elementFromPoint(x,y);return e&&e.__o?e.__o:null;}
 svg.addEventListener('pointerdown',e=>{
   const o=edgeAt(e.clientX,e.clientY);if(!o)return;
   e.preventDefault();
-  o.st=e.button===2?(o.st===2?0:2):(o.st+1)%3;
-  paint(o);update();
-  drag={mode:o.st,x:e.clientX,y:e.clientY};
+  const t=e.button===2?2:stool,er=o.st===t;
+  o.st=er?0:t;
+  paint(o);update();buzz();
+  drag={mode:er?0:t,kind:t,x:e.clientX,y:e.clientY};
 });
 window.addEventListener('pointermove',e=>{
   if(!drag)return;
   const dx=e.clientX-drag.x,dy=e.clientY-drag.y,n=Math.max(1,Math.ceil(Math.hypot(dx,dy)/6));
   let ch=false;
-  for(let i=1;i<=n;i++){const o=edgeAt(drag.x+dx*i/n,drag.y+dy*i/n);if(o&&apply(o,drag.mode))ch=true;}
+  for(let i=1;i<=n;i++){const o=edgeAt(drag.x+dx*i/n,drag.y+dy*i/n);if(o&&apply(o,drag))ch=true;}
   drag.x=e.clientX;drag.y=e.clientY;
   if(ch)update();
 });
@@ -256,6 +315,87 @@ $('diff').onchange=build;
 $('reset').onclick=()=>setEdges(()=>0);
 $('sol').onclick=()=>{setEdges((t,r,c)=>(t==='h'?sol.h[r][c]:sol.v[r][c])?1:0);};
 build();
+})();
+</script>
+<main id="kuro" hidden>
+  <h1>Kurodoko</h1>
+  <p class="sub">Noircissez des cases : chaque chiffre indique combien de cases il voit en ligne et en colonne, la sienne comprise. Les cases noires ne se touchent pas et les cases blanches restent reliées.</p>
+  <div class="bar">
+    <select id="ksize" aria-label="Taille"><option value="5">5 × 5</option><option value="6" selected>6 × 6</option><option value="8">8 × 8</option></select>
+    <select id="kdiff" aria-label="Difficulté"><option value="0.7">Facile</option><option value="0.5" selected>Moyen</option><option value="0.35">Difficile</option></select>
+    <button class="primary" id="knew">Nouvelle grille</button><button id="kreset">Effacer</button><button id="ksol">Solution</button>
+  </div>
+  <div class="tools" role="group" aria-label="Outil de pose"><button data-t="1" aria-pressed="true">■ Noir</button><button data-t="2" aria-pressed="false">● Blanc</button><button data-t="0" aria-pressed="false">✕ Gomme</button></div>
+  <div class="board"><div id="kg" class="kg"></div></div>
+  <div id="kstatus" aria-live="polite"></div>
+  <p class="help">Choisissez un outil puis touchez les cases. Retoucher une case du même état l’efface. Les chiffres deviennent verts quand ils sont satisfaits et rouges si vous avez trop noirci. Au clavier : flèches pour se déplacer, Entrée pour poser. La grille est aléatoire : toute solution qui respecte les règles est acceptée.</p>
+</main>
+<script>
+window.buzz=function(){if(window.__vib!==false&&navigator.vibrate){try{navigator.vibrate(8)}catch(e){}}};
+(function(){
+const q=id=>document.getElementById(id);
+const g=q('kg'),st=q('kstatus'),D=[[1,0],[-1,0],[0,1],[0,-1]];
+let N,clue,sol,s,cells,tool=1;
+function conn(b){let tot=0,start=null;
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(!b[r][c]){tot++;if(!start)start=[r,c];}
+  if(!start)return false;
+  const seen=new Set([start[0]*N+start[1]]),k=[start];
+  while(k.length){const [r,c]=k.pop();for(const [a,d] of D){const x=r+a,y=c+d;if(x<0||y<0||x>=N||y>=N||b[x][y]||seen.has(x*N+y))continue;seen.add(x*N+y);k.push([x,y]);}}
+  return seen.size===tot;}
+function vis(b,r,c){let n=1;for(const [a,d] of D){let x=r+a,y=c+d;while(x>=0&&y>=0&&x<N&&y<N&&!b[x][y]){n++;x+=a;y+=d;}}return n;}
+function adj(b,r,c){return D.some(([a,d])=>b[r+a]&&b[r+a][c+d]);}
+function build(){
+  N=+q('ksize').value;const dens=+q('kdiff').value;
+  const b=Array.from({length:N},()=>Array(N).fill(false)),order=[];
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++)order.push([r,c]);
+  order.sort(()=>Math.random()-.5);
+  const target=Math.round(N*N*.22);let n=0;
+  for(const [r,c] of order){if(n>=target)break;if(adj(b,r,c))continue;b[r][c]=true;if(conn(b))n++;else b[r][c]=false;}
+  sol=b;clue=b.map((row,r)=>row.map((x,c)=>x?null:(Math.random()<dens?vis(b,r,c):null)));
+  s=b.map(r=>r.map(()=>0));
+  g.innerHTML='';g.style.gridTemplateColumns='repeat('+N+',1fr)';cells=[];
+  for(let r=0;r<N;r++){cells.push([]);for(let c=0;c<N;c++){
+    const e=document.createElement('button');e.dataset.r=r;e.dataset.c=c;
+    if(clue[r][c]!==null)e.textContent=clue[r][c];
+    e.onclick=()=>{if(clue[r][c]!==null)return;s[r][c]=s[r][c]===tool?0:tool;buzz();upd();};
+    g.appendChild(e);cells[r].push(e);}}
+  upd();
+}
+function upd(){
+  const bl=s.map(row=>row.map(x=>x===1));let ok=true;
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+    const v=s[r][c];let cls='kc';
+    if(clue[r][c]!==null){cls+=' n';const n=vis(bl,r,c);if(n===clue[r][c])cls+=' done';else{ok=false;if(n<clue[r][c])cls+=' low';}}
+    else{if(v===1)cls+=' b';if(v===2)cls+=' w';if(v===1&&adj(bl,r,c)){cls+=' err';ok=false;}}
+    const e=cells[r][c];e.className=cls;
+    e.setAttribute('aria-label','Ligne '+(r+1)+', colonne '+(c+1)+', '+(clue[r][c]!==null?'chiffre '+clue[r][c]:['vide','noire','blanche'][v]));
+  }
+  const win=ok&&conn(bl);
+  g.classList.toggle('win',win);st.className=win?'ok':'';st.textContent=win?'Bravo, grille résolue !':'';
+}
+g.addEventListener('keydown',e=>{const t=e.target;if(t.dataset.r===undefined)return;
+  const m={ArrowUp:[-1,0],ArrowDown:[1,0],ArrowLeft:[0,-1],ArrowRight:[0,1]}[e.key];if(!m)return;
+  e.preventDefault();const x=+t.dataset.r+m[0],y=+t.dataset.c+m[1];if(cells[x]&&cells[x][y])cells[x][y].focus();});
+document.querySelectorAll('.tools button').forEach(b=>b.onclick=()=>{tool=+b.dataset.t;
+  document.querySelectorAll('.tools button').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));});
+q('knew').onclick=build;q('ksize').onchange=build;q('kdiff').onchange=build;
+q('kreset').onclick=()=>{s=s.map(r=>r.map(()=>0));upd();};
+q('ksol').onclick=()=>{s=sol.map(r=>r.map(x=>x?1:2));upd();};
+build();
+})();
+(function(){
+const $=id=>document.getElementById(id);
+function set(k,v){if(k==='vib')window.__vib=v;else document.body.classList.toggle(k,v);try{localStorage.setItem('ph_'+k,v?'1':'0')}catch(e){}}
+['big','hc','vib'].forEach(k=>{const el=$('o-'+k);let v=null;try{v=localStorage.getItem('ph_'+k)}catch(e){}
+  if(v===null)v=k==='vib'?'1':'0';el.checked=v==='1';set(k,el.checked);el.onchange=()=>set(k,el.checked);});
+$('a11y').onclick=()=>{const p=$('panel');p.hidden=!p.hidden;$('a11y').setAttribute('aria-expanded',p.hidden?'false':'true');};
+const views={hub:$('hub'),slitherlink:$('slither'),kurodoko:$('kuro')};
+function route(){let h=location.hash.slice(1);if(!views[h])h='hub';
+  for(const k in views)views[k].hidden=k!==h;$('home').hidden=h==='hub';window.scrollTo(0,0);}
+window.addEventListener('hashchange',route);
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{location.hash=b.dataset.go;route();});
+$('home').onclick=()=>{location.hash='';route();};
+route();
 })();
 </script>
 </body>
