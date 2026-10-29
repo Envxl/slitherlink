@@ -150,6 +150,28 @@ body.hc{--ink:#000;--muted:#222;--line:#0030c8;--grid:#555;--cross:#555;--dot:#0
 #pstatus{min-height:1.8em;margin:12px 2px 0;font-weight:600}
 #pstatus.ok{color:var(--ok);font-weight:700}
 .bar #pnew{grid-column:1/-1}
+.bl{stroke:var(--line);stroke-width:4.5;stroke-linecap:round}
+.lk .m,.lk .a,.lk .b{display:none}
+.lk.c1 .m,.lk.c2 .a,.lk.c2 .b{display:block}
+.bh{stroke:transparent;stroke-width:26;pointer-events:none}
+.lk.on .bh{pointer-events:stroke;cursor:pointer}
+.is{cursor:pointer;outline:none}
+.is .ib{fill:var(--panel);stroke:var(--ink);stroke-width:2.5;transition:fill .15s,stroke .15s}
+.isn{font-size:22px;font-weight:700;text-anchor:middle;dominant-baseline:central;fill:var(--ink);pointer-events:none;font-family:"Inter",system-ui,sans-serif}
+.is.cand .ib{stroke:var(--line);stroke-width:4.5}
+.is.sel .ib{fill:var(--line);stroke:var(--line)}
+.is.sel .isn{fill:#fff}
+.is.done .ib{stroke:var(--ok)}
+.is.done .isn{fill:var(--ok)}
+.is.over .ib{stroke:var(--bad)}
+.is.over .isn{fill:var(--bad)}
+.is:focus-visible .ib{stroke:var(--line);stroke-width:6}
+.bsvg.win .bl{stroke:var(--ok)}
+.bsvg.win .is .ib{stroke:var(--ok)}
+#bstatus{min-height:1.8em;margin:12px 2px 0;font-weight:600}
+#bstatus.ok{color:var(--ok);font-weight:700}
+.bar #bnew,.bar #bsize{grid-column:1/-1}
+body.big .isn{font-size:26px}
 </style>
 </head>
 <body>
@@ -162,6 +184,7 @@ body.hc{--ink:#000;--muted:#222;--line:#0030c8;--grid:#555;--cross:#555;--dot:#0
     <button class="card" data-go="slitherlink"><span class="ic"><svg width="30" height="30" viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5h12v8h8v12H11v-8H5z"/></svg></span><span><b>Slitherlink</b><span class="d">Tracez une boucle unique autour des chiffres.</span></span></button>
     <button class="card" data-go="kurodoko"><span class="ic"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="3" y="3" width="11" height="11" rx="3" fill="currentColor"/><rect x="16" y="3" width="11" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="2.5"/><rect x="3" y="16" width="11" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="2.5"/><rect x="16" y="16" width="11" height="11" rx="3" fill="currentColor"/></svg></span><span><b>Kurodoko</b><span class="d">Noircissez des cases pour satisfaire les chiffres.</span></span></button>
     <button class="card" data-go="pipes"><span class="ic"><svg width="30" height="30" viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h10v14h12M14 15h8"/></svg></span><span><b>Pipes</b><span class="d">Tournez les tuyaux pour relier tout le réseau.</span></span></button>
+    <button class="card" data-go="bridges"><span class="ic"><svg width="30" height="30" viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><circle cx="23" cy="7" r="4.5"/><circle cx="23" cy="23" r="4.5"/><path d="M11.5 6h7M11.5 8h7M23 11.5v7"/></svg></span><span><b>Bridges</b><span class="d">Reliez les îles avec le bon nombre de ponts.</span></span></button>
     <div class="card soon"><span class="ic" aria-hidden="true">+</span><span><b>Bientôt</b><span class="d">D’autres jeux arrivent.</span></span></div>
   </div>
 </main>
@@ -352,6 +375,17 @@ build();
   <div id="pstatus" aria-live="polite"></div>
   <p class="help">Un toucher fait tourner la tuile vers la droite, un clic droit vers la gauche. Les tuyaux reliés à la source s’illuminent. Au clavier : flèches pour se déplacer, Entrée pour pivoter.</p>
 </main>
+<main id="bridges" hidden>
+  <h1>Bridges</h1>
+  <p class="sub">Reliez les îles par des ponts horizontaux ou verticaux (1 ou 2 par paire). Chaque chiffre indique le nombre de ponts de l’île, les ponts ne se croisent pas et toutes les îles doivent former un seul réseau.</p>
+  <div class="bar">
+    <select id="bsize" aria-label="Taille"><option value="5">5 × 5</option><option value="7" selected>7 × 7</option><option value="9">9 × 9</option></select>
+    <button class="primary" id="bnew">Nouvelle grille</button><button id="breset">Effacer</button><button id="bsol">Solution</button>
+  </div>
+  <div class="board"><svg id="bsvg" class="bsvg" role="group" aria-label="Grille de Bridges"></svg></div>
+  <div id="bstatus" aria-live="polite"></div>
+  <p class="help">Touchez une île, puis une île voisine en ligne droite (les îles possibles sont entourées) : un pont apparaît. Répétez pour un double pont, ou touchez directement un pont pour passer à 2 puis à 0. Chiffre vert : complet. Rouge : trop de ponts.</p>
+</main>
 <script>
 window.buzz=function(){if(window.__vib!==false&&navigator.vibrate){try{navigator.vibrate(8)}catch(e){}}};
 (function(){
@@ -458,12 +492,97 @@ q('psol').onclick=()=>{rot=rot.map(row=>row.map(v=>v+((4-(((v%4)+4)%4))%4)));syn
 build();
 })();
 (function(){
+const q=id=>document.getElementById(id),svg=q('bsvg'),st=q('bstatus'),NS='http://www.w3.org/2000/svg';
+const S=56,M=34,D4=[[0,1],[1,0],[0,-1],[-1,0]],rnd=n=>Math.floor(Math.random()*n);
+let N,is,links,lm,sel,note='';
+const el=(n,a,p)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e;};
+function gen(){
+  for(;;){
+    const occ=Array.from({length:N},()=>Array(N).fill(0)),ids=Array.from({length:N},()=>Array(N).fill(-1));
+    const L=[{r:rnd(N),c:rnd(N)}];occ[L[0].r][L[0].c]=1;ids[L[0].r][L[0].c]=0;
+    const br=new Map(),tgt=Math.round(N*N*.28),key=(a,b)=>Math.min(a,b)*1000+Math.max(a,b);
+    for(let t=0;t<800&&L.length<tgt;t++){
+      const ai=rnd(L.length),a=L[ai],d=D4[rnd(4)],len=2+rnd(3);let ok=true;
+      for(let i=1;i<=len;i++){const r=a.r+d[0]*i,c=a.c+d[1]*i;if(r<0||c<0||r>=N||c>=N||occ[r][c]){ok=false;break;}}
+      if(!ok)continue;
+      for(let i=1;i<len;i++)occ[a.r+d[0]*i][a.c+d[1]*i]=2;
+      const r=a.r+d[0]*len,c=a.c+d[1]*len;occ[r][c]=1;ids[r][c]=L.length;
+      br.set(key(ai,L.length),1+(Math.random()<.4?1:0));L.push({r,c});
+    }
+    if(L.length<tgt*.7)continue;
+    L.forEach((a,ai)=>{for(const d of [[0,1],[1,0]]){let r=a.r+d[0],c=a.c+d[1];
+      while(r<N&&c<N&&occ[r][c]===0){r+=d[0];c+=d[1];}
+      if(r<N&&c<N&&occ[r][c]===1&&Math.random()<.35){const bi=ids[r][c];if(!br.has(key(ai,bi))){
+        let x=a.r+d[0],y=a.c+d[1];while(x!==r||y!==c){occ[x][y]=2;x+=d[0];y+=d[1];}
+        br.set(key(ai,bi),1+(Math.random()<.4?1:0));}}}});
+    return {L,br};
+  }
+}
+function build(){
+  N=+q('bsize').value;const g0=gen();
+  is=g0.L.map(o=>({r:o.r,c:o.c,n:0,l:[]}));
+  const grid=Array.from({length:N},()=>Array(N).fill(-1));is.forEach((o,i)=>grid[o.r][o.c]=i);
+  links=[];lm=new Map();
+  is.forEach((a,ai)=>{for(const d of [[0,1],[1,0]]){let r=a.r+d[0],c=a.c+d[1];const cells=[];
+    while(r<N&&c<N&&grid[r][c]<0){cells.push(r*N+c);r+=d[0];c+=d[1];}
+    if(r<N&&c<N){const bi=grid[r][c],k=Math.min(ai,bi)*1000+Math.max(ai,bi),w=g0.br.get(k)||0;
+      const lk={a:ai,b:bi,cells,cnt:0,sol:w,x:[]};links.push(lk);lm.set(k,lk);is[ai].l.push(lk);is[bi].l.push(lk);is[ai].n+=w;is[bi].n+=w;}}});
+  const cm=new Map();
+  links.forEach(lk=>lk.cells.forEach(cc=>{if(!cm.has(cc))cm.set(cc,[]);cm.get(cc).push(lk);}));
+  cm.forEach(a=>{if(a.length>1)a.forEach(x=>a.forEach(y=>{if(x!==y)x.x.push(y);}));});
+  svg.innerHTML='';const W=(N-1)*S+2*M;svg.setAttribute('viewBox','0 0 '+W+' '+W);svg.classList.remove('win');
+  const P=(r,c)=>[M+c*S,M+r*S],gL=el('g',{},svg),gI=el('g',{},svg);sel=null;note='';
+  links.forEach(lk=>{
+    const A=is[lk.a],B=is[lk.b],[x1,y1]=P(A.r,A.c),[x2,y2]=P(B.r,B.c),hz=y1===y2,g=el('g',{class:'lk'},gL);
+    const ln=(cl,o)=>el('line',{class:cl,x1:x1+(hz?0:o),y1:y1+(hz?o:0),x2:x2+(hz?0:o),y2:y2+(hz?o:0)},g);
+    ln('bl m',0);ln('bl a',-5);ln('bl b',5);
+    ln('bh',0).onclick=()=>{lk.cnt=(lk.cnt+1)%3;note='';buzz();upd();};
+    lk.g=g;
+  });
+  is.forEach((o,i)=>{const [x,y]=P(o.r,o.c);
+    const g=el('g',{class:'is',tabindex:0,role:'button',transform:'translate('+x+' '+y+')'},gI);
+    el('circle',{r:27,fill:'#000','fill-opacity':0},g);el('circle',{class:'ib',r:21},g);
+    el('text',{class:'isn'},g).textContent=o.n;
+    g.onclick=()=>tap(i);
+    g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tap(i);}};
+    o.g=g;});
+  upd();
+}
+const blocked=lk=>lk.cnt===0&&lk.x.some(y=>y.cnt>0);
+const linkOf=(a,b)=>lm.get(Math.min(a,b)*1000+Math.max(a,b));
+function tap(i){
+  note='';
+  if(sel===null)sel=i;
+  else if(sel===i)sel=null;
+  else{const lk=linkOf(sel,i);
+    if(!lk)sel=i;
+    else if(blocked(lk)){note='Un pont ne peut pas en croiser un autre.';sel=null;}
+    else{lk.cnt=(lk.cnt+1)%3;sel=null;buzz();}}
+  upd();
+}
+function upd(){
+  const cnt=is.map(o=>o.l.reduce((s,l)=>s+l.cnt,0)),cand=new Set();let ok=true;
+  if(sel!==null)is[sel].l.forEach(l=>{if(l.cnt>0||!blocked(l))cand.add(l.a===sel?l.b:l.a);});
+  is.forEach((o,i)=>{const c=cnt[i];if(c!==o.n)ok=false;
+    o.g.setAttribute('class','is'+(i===sel?' sel':'')+(cand.has(i)?' cand':'')+(c===o.n?' done':c>o.n?' over':''));
+    o.g.setAttribute('aria-label','Île '+o.n+', ligne '+(o.r+1)+', colonne '+(o.c+1)+', '+c+' pont'+(c>1?'s':'')+(i===sel?', sélectionnée':''));});
+  links.forEach(l=>l.g.setAttribute('class','lk'+(l.cnt?' on c'+l.cnt:'')));
+  let conn=false;
+  if(ok){const seen=new Set([0]),k=[0];while(k.length){const i=k.pop();is[i].l.forEach(l=>{if(!l.cnt)return;const j=l.a===i?l.b:l.a;if(!seen.has(j)){seen.add(j);k.push(j);}});}conn=seen.size===is.length;}
+  svg.classList.toggle('win',conn);st.className=conn?'ok':'';st.textContent=conn?'Bravo, toutes les îles sont reliées !':note;
+}
+q('bnew').onclick=build;q('bsize').onchange=build;
+q('breset').onclick=()=>{links.forEach(l=>l.cnt=0);sel=null;note='';upd();};
+q('bsol').onclick=()=>{links.forEach(l=>l.cnt=l.sol);sel=null;note='';upd();};
+build();
+})();
+(function(){
 const $=id=>document.getElementById(id);
 function set(k,v){if(k==='vib')window.__vib=v;else document.body.classList.toggle(k,v);try{localStorage.setItem('ph_'+k,v?'1':'0')}catch(e){}}
 ['big','hc','vib'].forEach(k=>{const el=$('o-'+k);let v=null;try{v=localStorage.getItem('ph_'+k)}catch(e){}
   if(v===null)v=k==='vib'?'1':'0';el.checked=v==='1';set(k,el.checked);el.onchange=()=>set(k,el.checked);});
 $('a11y').onclick=()=>{const p=$('panel');p.hidden=!p.hidden;$('a11y').setAttribute('aria-expanded',p.hidden?'false':'true');};
-const views={hub:$('hub'),slitherlink:$('slither'),kurodoko:$('kuro'),pipes:$('pipes')};
+const views={hub:$('hub'),slitherlink:$('slither'),kurodoko:$('kuro'),pipes:$('pipes'),bridges:$('bridges')};
 function route(){let h=location.hash.slice(1);if(!views[h])h='hub';
   for(const k in views)views[k].hidden=k!==h;$('home').hidden=h==='hub';window.scrollTo(0,0);}
 window.addEventListener('hashchange',route);
